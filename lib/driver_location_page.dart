@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-
+import 'package:firebase_database/firebase_database.dart';
 class DriverLocationPage extends StatefulWidget {
   const DriverLocationPage({super.key});
 
@@ -95,13 +95,22 @@ class _DriverLocationPageState extends State<DriverLocationPage> {
           accuracy: LocationAccuracy.high,
           distanceFilter: 5,
         ),
-      ).listen((Position position) {
-        if (!mounted) return;
+      ).listen((Position position) async {
+  if (!mounted) return;
 
-        setState(() {
-          currentPosition = position;
-        });
-      });
+  setState(() {
+    currentPosition = position;
+  });
+
+  await FirebaseDatabase.instance
+      .ref('buses/bus1')
+      .set({
+    'latitude': position.latitude,
+    'longitude': position.longitude,
+    'accuracy': position.accuracy,
+    'timestamp': ServerValue.timestamp,
+  });
+});
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
